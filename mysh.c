@@ -8,10 +8,10 @@
 char **split_text(char *);
 
 int main() {
-    do {
-        char user_input[100];
-        char **arguments = NULL;
+    char user_input[100];
+    char **arguments = NULL;
         
+    do {
         // O prompt no formato expecificado em (6)
         printf("[MySh] %s@%s:%s$ ", getenv("USER"), getenv("HOSTNAME"), getcwd(NULL, CWD_SIZE));
         fgets(user_input, sizeof(user_input), stdin);
@@ -22,13 +22,18 @@ int main() {
         // Verifica se foi possível dividir os valores de entrada
         if(arguments == NULL)
             exit(-1);
-        
-        /* execvp(arguments[0], arguments); */
 
-        // Libera a memória que foi alocada
-        if(arguments != NULL)
-            free(arguments);
+        // Verifica por comandos especiais
+        if(strcmp(arguments[0], "exit\n") == 0)
+            break;
+
+        // Executa o comando enviado pelo usuário
+        execvp(arguments[0], arguments);
     } while(1);
+
+    // Libera a memória que foi alocada
+    if(arguments != NULL)
+        free(arguments);
     return 0;
 }
 
