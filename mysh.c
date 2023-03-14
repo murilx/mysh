@@ -6,9 +6,11 @@
 #define CWD_SIZE 100
 
 char **split_text(char *);
+char **split_text(char *str, const char *delim);
 
 int main() {
     char user_input[100];
+    char user_input[1000];
     char **arguments = NULL;
         
     do {
@@ -23,12 +25,15 @@ int main() {
         // Divide a entrada recebida em um vetor de strings
         arguments = split_text(user_input);
 
+        arguments = split_text(user_input, " ");
+        
         // Verifica se foi possível dividir os valores de entrada
         if(arguments == NULL)
             exit(-1);
 
         // Verifica por comandos especiais
         if(strcmp(arguments[0], "exit\n") == 0)
+        if(strcmp(arguments[0], "exit") == 0)
             break;
 
         // Executa o comando enviado pelo usuário em um processo filho
@@ -43,9 +48,8 @@ int main() {
     return 0;
 }
 
-char **split_text(char *str) {
     char **list = NULL;
-    char *token = strtok(str, " ");
+    char *token = strtok(str, delim);
     int n_spaces = 0;
 
     // Armazena o comando e os argumentos em uma array de strings
@@ -55,7 +59,7 @@ char **split_text(char *str) {
             exit(-1); // Falha na alocação de memória
         list[n_spaces-1] = (char *)malloc(sizeof(char *) * strlen(token) + 1);
         strcpy(list[n_spaces-1], token);
-        token = strtok(NULL, " ");
+        token = strtok(NULL, delim);
     }
     // Adiciona o NULL necessário no fim da array
     list = realloc(list, sizeof(char *) * ++n_spaces);
