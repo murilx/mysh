@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #define CWD_SIZE 100
 
@@ -30,15 +31,28 @@ int main() {
         if(arguments == NULL)
             exit(-1);
 
-        // Verifica por comandos especiais
+        /* ----- Comandos 'especiais' ----- */
         if(strcmp(arguments[0], "exit") == 0)
             break;
+
+        if(strcmp(arguments[0], "cd") == 0) {
+            if(arguments[1] != NULL && !(strcmp(arguments[1], "~") == 0)) {
+                status_code = chdir(arguments[1]);
+                if(status_code == -1) {
+                    fprintf(stderr, "Erro na execucao de 'cd' com argumento %s: %s\n",
+                            arguments[1], strerror(errno));
+                }
+            }
+            else
+                chdir(getenv("HOME"));
+            continue;
+        }
 
         // Executa o comando enviado pelo usuário em um processo filho
         if(fork() == 0) {
            status_code = execvp(arguments[0], arguments);
            if(status_code == -1)
-               fprintf(stderr, "Erro na execucao de: %s\n", arguments[0]);
+               fprintf(stderr, "Erro na execucao de %s: %s\n", arguments[0], strerror(errno));
         }
         wait(NULL); // Espera o processo filho terminar para continuar o processo pai
     } while(1);
