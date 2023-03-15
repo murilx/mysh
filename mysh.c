@@ -2,22 +2,36 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <sys/wait.h>
 #include <errno.h>
 
-#define CWD_SIZE 100
-
-char **split_text(char *str, const char *delim);
+char **strspl(char *str, const char *delim);
 
 int main() {
     char user_input[1000];
     char **arguments = NULL;
     int status_code = 0;
+    char *cwd = NULL;
     
     do {
+        // Caso haja $HOME no diretório atual, substitui por ~
+        cwd = getcwd(NULL, 0);
+        if(strstr(cwd, getenv("HOME")) != NULL) {
+            int tmp = 1;
+            cwd[0] = '~';
+            if(strlen(getenv("HOME")) == strlen(cwd))
+                cwd[1] = '\0';
+            else {
+                for(int i = strlen(getenv("HOME")); i < strlen(cwd); i++) {
+                    char aux = cwd[i];
+                    cwd[tmp++] = aux;
+                }
+                cwd[tmp] = '\0';
+            }
+        }    
+        
         // O prompt no formato expecificado em (6)
-        printf("[MySh] %s@%s:%s$ ", getenv("USER"), getenv("HOSTNAME"), getcwd(NULL, CWD_SIZE));
+        printf("[MySh] %s@%s:%s$ ", getenv("USER"), getenv("HOSTNAME"), cwd);
         fgets(user_input, sizeof(user_input), stdin);
 
         // Retira o possível '\n' que existe no final da string
@@ -25,7 +39,7 @@ int main() {
             user_input[strlen(user_input)-1] = '\0';
         
         // Divide a entrada recebida em um vetor de strings
-        arguments = split_text(user_input, " ");
+        arguments = strspl(user_input, " ");
         
         // Verifica se foi possível dividir os valores de entrada
         if(arguments == NULL)
@@ -58,12 +72,12 @@ int main() {
     } while(1);
 
     // Libera a memória que foi alocada
-    if(arguments != NULL)
-        free(arguments);
+    if(arguments != NULL) free(arguments);
+    if(cwd != NULL) free(cwd);
     return 0;
 }
 
-char **split_text(char *str, const char *delim) {
+char **strspl(char *str, const char *delim) {
     char **list = NULL;
     char *token = strtok(str, delim);
     int n_spaces = 0;
