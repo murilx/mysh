@@ -34,6 +34,15 @@ int main() {
         printf("[MySh] %s@%s:%s$ ", getenv("USER"), getenv("HOSTNAME"), cwd);
         fgets(user_input, sizeof(user_input), stdin);
 
+        /* Faz essa verificação pra caso o usuário tenha apenas apertado
+           'enter' e mais nada, ou seja, o input tenha sido apenas um '\n'
+        
+           IMPORTANTE: Sem essa linha o código estava dando segmentation fault
+           quando apenas o 'enter' era apertado, não sei exatamente o motivo
+           mas acredito que tenha a ver com o strspl.
+        */
+        if(user_input[0] == '\n') continue; 
+        
         // Retira o possível '\n' que existe no final da string
         if(user_input[strlen(user_input)-1] == '\n')
             user_input[strlen(user_input)-1] = '\0';
