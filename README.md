@@ -1,4 +1,4 @@
-# Trabalho 1 - MySh
+# SO2 - Trabalho 1 - MySh
 
 Trabalho da matéria de Sistemas Operacionais II. O objetivo era
 construir um Shell que cumprisse os seguintes requisitos:
